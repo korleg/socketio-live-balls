@@ -18,11 +18,24 @@ app.controller('indexController', ['$scope', 'indexFactory', ($scope, indexFacto
         });
     };
 
-    function initSocket(username) {
-        indexFactory.connectSocket('http://localhost:3000', {
-        reconnectionAttemts:3,
-        reconnectionDelay:600,
-    }).then((socket) => {
+    function showBubble(id, message) {
+        $('#' + id).find('.message').show().html(message);
+
+        setTimeout(() => {
+            $('#' + id).find('.message').hide()
+        }, 2000);
+    };
+
+    async function initSocket(username) {
+
+        const connectionOptions = {
+            reconnectionAttemts:3,
+            reconnectionDelay:600,
+        };
+        try{
+
+        const socket = await indexFactory.connectSocket('http://localhost:3000', connectionOptions);
+        
         socket.emit('newUser', {username});
 
         socket.on('initPlayers', (players) => {
@@ -40,6 +53,8 @@ app.controller('indexController', ['$scope', 'indexFactory', ($scope, indexFacto
             };
             $scope.messages.push(messageData);
             $scope.players[data.id] = data;
+            scrollTop();
+
             $scope.$apply();
         });
         socket.on('disUser', (data) => {
@@ -52,6 +67,8 @@ app.controller('indexController', ['$scope', 'indexFactory', ($scope, indexFacto
             };
             $scope.messages.push(messageData);
             delete $scope.players[data.id];
+            scrollTop();
+
             $scope.$apply();
         });
 
@@ -64,6 +81,7 @@ app.controller('indexController', ['$scope', 'indexFactory', ($scope, indexFacto
         socket.on('newMessage', (message) => {
             $scope.messages.push(message);
             $scope.$apply();
+            showBubble(message.socketId, message.text);
             scrollTop();
         });
 
@@ -93,13 +111,13 @@ app.controller('indexController', ['$scope', 'indexFactory', ($scope, indexFacto
             $scope.message = '';
 
             socket.emit('newMessage', messageData)
-
+            showBubble(socket.id, message);
             scrollTop();
             
         };
-    }).catch((err) => {
-        console.log(err)
-    });
+        } catch(e) {
+            console.log(e)
+        };
     }
 
     

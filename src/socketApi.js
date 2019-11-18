@@ -32,16 +32,21 @@ io.on('connection', (socket) => {
         delete users[socket.id];
     });
     socket.on('animated', (data) => {
-        users[socket.id].position.x = data.x;
+        try {
+            users[socket.id].position.x = data.x;
         users[socket.id].position.y = data.y;
         socket.broadcast.emit('animate', {
             socketId: socket.id,
             x: data.x,
             y: data.y
         }); 
+        } catch (error) {
+            console.log(error);
+        };
     });
     socket.on('newMessage', (data) => {
-        socket.broadcast.emit('newMessage', data);
+        const messageData = Object.assign({socketId: socket.id}, data)
+        socket.broadcast.emit('newMessage', messageData);
     });
 });
 
