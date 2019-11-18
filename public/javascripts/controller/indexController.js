@@ -34,7 +34,7 @@ app.controller('indexController', ['$scope', 'indexFactory', ($scope, indexFacto
         };
         try{
 
-        const socket = await indexFactory.connectSocket('http://localhost:3000', connectionOptions);
+        const socket = await indexFactory.connectSocket('https://korleg-socketio-message.herokuapp.com/', connectionOptions);
         
         socket.emit('newUser', {username});
 
